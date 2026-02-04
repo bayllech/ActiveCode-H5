@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infinity Code - 高级激活码生成系统</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="ambient-glow"></div>
+    <div class="ambient-glow-2"></div>
+
+    <div class="app-container">
+        <header class="app-header">
+            <div class="logo-area">
+                <div class="logo-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                    </svg>
+                </div>
+                <h1>激活码生成器</h1>
+            </div>
+            <p class="subtitle">批量卡密生成解决方案</p>
+            <button id="theme-toggle" class="theme-toggle-btn" aria-label="切换主题">
+                <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+                <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+            </button>
+        </header>
+
+        <main class="main-content">
+            <!-- Configuration Panel -->
+            <section class="glass-card config-panel">
+                <div class="card-header">
+                    <h3><span class="icon">⚙️</span> 参数配置</h3>
+                </div>
+
+                <div class="input-grid">
+                    <div class="form-group full-width">
+                        <label for="prefix">前缀标识 <span class="optional">(选填)</span></label>
+                        <div class="input-wrapper">
+                            <input type="text" id="prefix" placeholder="例如: VIP-2024-" autocomplete="off">
+                            <div class="input-focus-border"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="length">密钥长度</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="length" value="16" min="8" max="128">
+                            <div class="input-focus-border"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="count">生成数量</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="count" value="10" min="1" max="5000">
+                            <div class="input-focus-border"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>字符集组合</label>
+                    <div class="checkbox-group">
+                        <label class="custom-checkbox-wrapper">
+                            <input type="checkbox" id="use-numbers" checked>
+                            <span class="checkbox-visual">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                    <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                            </span>
+                            <span class="label-text">数字 (0-9)</span>
+                        </label>
+                        <label class="custom-checkbox-wrapper">
+                            <input type="checkbox" id="use-upper" checked>
+                            <span class="checkbox-visual">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                    <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                            </span>
+                            <span class="label-text">大写 (A-Z)</span>
+                        </label>
+                        <label class="custom-checkbox-wrapper">
+                            <input type="checkbox" id="use-lower">
+                            <span class="checkbox-visual">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                    <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                            </span>
+                            <span class="label-text">小写 (a-z)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <button id="generate-btn" class="glow-button">
+                    <span class="btn-content">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M21 12a9 9 0 11-6.219-8.56" />
+                        </svg>
+                        立即生成密钥
+                    </span>
+                    <div class="btn-glow"></div>
+                </button>
+            </section>
+
+            <!-- Result Panel -->
+            <section class="glass-card result-panel">
+                <div class="card-header flex-between">
+                    <h3>
+                        <span class="icon">🚀</span> 生成结果
+                        <span id="result-count" class="badge hidden">0</span>
+                    </h3>
+                    <button id="copy-btn" class="icon-button" disabled title="复制全部">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                        </svg>
+                        <span>复制</span>
+                    </button>
+                </div>
+
+                <div class="terminal-window">
+                    <div class="terminal-header">
+                        <div class="dot red"></div>
+                        <div class="dot yellow"></div>
+                        <div class="dot green"></div>
+                    </div>
+                    <textarea id="result-area" readonly placeholder="// 等待生成指令..."></textarea>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>纯前端本地页面运行，数据安全可靠</p>
+        </footer>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
