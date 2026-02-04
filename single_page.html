@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infinity Code - 高级激活码生成系统</title>
+    <style>
+        :root {
+            /* --- Light Theme (Default) --- */
+            --bg-deep: #f3f4f6;
+            --bg-surface: rgba(255, 255, 255, 0.7);
+            --bg-surface-hover: rgba(255, 255, 255, 0.9);
+
+            --primary-glow: #3b82f6;
+            --secondary-glow: #8b5cf6;
+            --accent-cyan: #0891b2;
+
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+
+            --border-glass: rgba(255, 255, 255, 0.6);
+            --border-active: rgba(59, 130, 246, 0.6);
+
+            --success: #059669;
+
+            /* Terminal Light */
+            --terminal-bg: #f1f5f9;
+            --terminal-header: rgba(226, 232, 240, 0.5);
+            --terminal-text: #334155;
+            --terminal-placeholder: rgba(51, 65, 85, 0.4);
+
+            --input-bg: var(--bg-surface-hover);
+            --checkbox-bg: rgba(0, 0, 0, 0.05);
+            --checkbox-bg-checked: var(--primary-glow);
+            --icon-btn-hover: rgba(0, 0, 0, 0.05);
+
+            /* Text Gradients */
+            --title-gradient: linear-gradient(135deg, #1e293b 0%, #64748b 100%);
+
+            /* Spacing & Radius */
+            --radius-lg: 20px;
+            --radius-md: 12px;
+            --radius-sm: 6px;
+
+            --font-sans: 'Outfit', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        [data-theme="dark"] {
+            /* --- Dark Theme --- */
+            --bg-deep: #030712;
+            --bg-surface: rgba(255, 255, 255, 0.03);
+            --bg-surface-hover: rgba(255, 255, 255, 0.05);
+
+            --primary-glow: #6366f1;
+            --secondary-glow: #a855f7;
+            --accent-cyan: #06b6d4;
+
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+
+            --border-glass: rgba(255, 255, 255, 0.08);
+            --border-active: rgba(99, 102, 241, 0.5);
+
+            --success: #10b981;
+
+            /* Terminal Dark */
+            --terminal-bg: #0d1117;
+            --terminal-header: rgba(255, 255, 255, 0.03);
+            --terminal-text: #10b981;
+            --terminal-placeholder: rgba(16, 185, 129, 0.3);
+
+            --input-bg: rgba(0, 0, 0, 0.2);
+            --checkbox-bg: rgba(255, 255, 255, 0.05);
+            --checkbox-bg-checked: var(--primary-glow);
+            --icon-btn-hover: rgba(255, 255, 255, 0.1);
+
+            --title-gradient: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-deep);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+            padding: 2rem;
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+
+        /* --- Theme Toggle --- */
+        .theme-toggle-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-glass);
+            color: var(--text-primary);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .theme-toggle-btn:hover {
+            background: var(--bg-surface-hover);
+            transform: rotate(15deg);
+        }
+
+        .sun-icon {
+            display: none;
+        }
+
+        .moon-icon {
+            display: block;
+        }
+
+        [data-theme="dark"] .sun-icon {
+            display: block;
+        }
+
+        [data-theme="dark"] .moon-icon {
+            display: none;
+        }
+
+        /* --- Ambient Background --- */
+        .ambient-glow,
+        .ambient-glow-2 {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: -1;
+            opacity: 0.4;
+            animation: floating 20s infinite alternate;
+        }
+
+        .ambient-glow {
+            top: -10%;
+            left: -10%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, var(--primary-glow), transparent 70%);
+        }
+
+        .ambient-glow-2 {
+            bottom: -10%;
+            right: -10%;
+            width: 700px;
+            height: 700px;
+            background: radial-gradient(circle, var(--secondary-glow), transparent 70%);
+            animation-delay: -10s;
+        }
+
+        @keyframes floating {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            100% {
+                transform: translate(50px, 50px) scale(1.1);
+            }
+        }
+
+        /* --- Layout --- */
+        .app-container {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            z-index: 10;
+            position: relative;
+        }
+
+        /* --- Header --- */
+        .app-header {
+            text-align: center;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .logo-icon {
+            color: var(--accent-cyan);
+            filter: drop-shadow(0 0 10px rgba(6, 182, 212, 0.5));
+        }
+
+        .app-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: var(--title-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.03em;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            font-weight: 300;
+        }
+
+        /* --- Glass Cards --- */
+        .glass-card {
+            background: var(--bg-surface);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-lg);
+            padding: 2.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s;
+        }
+
+        [data-theme="dark"] .glass-card {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .glass-card:hover {
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.15);
+        }
+
+        [data-theme="dark"] .glass-card:hover {
+            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.6);
+        }
+
+        .card-header {
+            border-bottom: 1px solid var(--border-glass);
+            margin: -2.5rem -2.5rem 2rem -2.5rem;
+            padding: 1.5rem 2.5rem;
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .card-header h3 {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .card-header .icon {
+            font-size: 1.25rem;
+        }
+
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* --- Form Inputs --- */
+        .input-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .optional {
+            color: var(--text-muted);
+            font-weight: 400;
+            margin-left: 0.4rem;
+        }
+
+        .input-wrapper {
+            position: relative;
+            background: var(--input-bg);
+            border-radius: var(--radius-md);
+            transition: all 0.3s ease;
+        }
+
+        input {
+            width: 100%;
+            background: transparent;
+            border: 1px solid var(--border-glass);
+            color: var(--text-primary);
+            padding: 0.875rem 1rem;
+            font-size: 1rem;
+            font-family: var(--font-sans);
+            border-radius: var(--radius-md);
+            transition: all 0.2s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-glow);
+            background: rgba(99, 102, 241, 0.05);
+            box-shadow: 0 0 0 1px var(--primary-glow);
+        }
+
+        /* --- Checkboxes --- */
+        .checkbox-group {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .custom-checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .custom-checkbox-wrapper input {
+            display: none;
+        }
+
+        .checkbox-visual {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            background: var(--checkbox-bg);
+            border: 1px solid var(--border-glass);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: transparent;
+            transition: all 0.2s ease;
+        }
+
+        .checkbox-visual svg {
+            width: 14px;
+            height: 14px;
+            filter: drop-shadow(0 0 2px currentColor);
+        }
+
+        input:checked+.checkbox-visual {
+            background: var(--checkbox-bg-checked);
+            border-color: var(--primary-glow);
+            color: white;
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .label-text {
+            color: var(--text-secondary);
+            transition: color 0.2s;
+        }
+
+        input:checked~.label-text {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        /* --- Button --- */
+        .glow-button {
+            width: 100%;
+            position: relative;
+            margin-top: 2rem;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary-glow), var(--secondary-glow));
+            border: none;
+            border-radius: var(--radius-md);
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            font-family: var(--font-sans);
+            cursor: pointer;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .glow-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4);
+        }
+
+        .glow-button:active {
+            transform: translateY(0);
+        }
+
+        .btn-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        /* --- Terminal Result Area --- */
+        .terminal-window {
+            background: var(--terminal-bg);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-glass);
+            overflow: hidden;
+            transition: background-color 0.3s;
+        }
+
+        .terminal-header {
+            background: var(--terminal-header);
+            padding: 0.75rem 1rem;
+            display: flex;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--border-glass);
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .dot.red {
+            background: #ef4444;
+        }
+
+        .dot.yellow {
+            background: #eab308;
+        }
+
+        .dot.green {
+            background: #22c55e;
+        }
+
+        #result-area {
+            width: 100%;
+            height: 350px;
+            background: transparent;
+            border: none;
+            padding: 1.5rem;
+            color: var(--terminal-text);
+            font-family: var(--font-mono);
+            font-size: 0.95rem;
+            line-height: 1.7;
+            resize: vertical;
+            transition: color 0.3s;
+        }
+
+        #result-area::placeholder {
+            color: var(--terminal-placeholder);
+        }
+
+        #result-area:focus {
+            outline: none;
+        }
+
+        /* --- Action Buttons & Badges --- */
+        .badge {
+            background: rgba(6, 182, 212, 0.15);
+            color: var(--accent-cyan);
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            border: 1px solid rgba(6, 182, 212, 0.3);
+        }
+
+        .icon-button {
+            background: transparent;
+            border: 1px solid var(--border-glass);
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-family: var(--font-sans);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .icon-button:hover:not(:disabled) {
+            background: var(--icon-btn-hover);
+            color: var(--text-primary);
+            border-color: var(--border-glass);
+        }
+
+        .icon-button.success {
+            color: var(--success);
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .icon-button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        footer {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .input-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .theme-toggle-btn {
+                top: -3rem;
+                right: 0;
+            }
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="ambient-glow"></div>
+    <div class="ambient-glow-2"></div>
+
+    <div class="app-container">
+        <header class="app-header">
+            <div class="logo-area">
+                <div class="logo-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                    </svg>
+                </div>
+                <h1>激活码生成器</h1>
+            </div>
+            <p class="subtitle">批量卡密生成解决方案</p>
+            <button id="theme-toggle" class="theme-toggle-btn" aria-label="切换主题">
+                <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+                <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                </svg>
+            </button>
+        </header>
+
+        <main class="main-content">
+            <!-- Configuration Panel -->
+            <section class="glass-card config-panel">
+                <div class="card-header">
+                    <h3><span class="icon">⚙️</span> 参数配置</h3>
+                </div>
+
+                <div class="input-grid">
+                    <div class="form-group full-width">
+                        <label for="prefix">前缀标识 <span class="optional">(选填)</span></label>
+                        <div class="input-wrapper">
+                            <input type="text" id="prefix" placeholder="例如: VIP-2024-" autocomplete="off">
+                            <div class="input-focus-border"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="length">密钥长度</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="length" value="16" min="8" max="128">
+                            <div class="input-focus-border"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="count">生成数量</label>
+                        <div class="input-wrapper">
+                            <input type="number" id="count" value="10" min="1" max="5000">
+                            <div class="input-focus-border"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>字符集组合</label>
+                    <div class="checkbox-group">
+                        <label class="custom-checkbox-wrapper">
+                            <input type="checkbox" id="use-numbers" checked>
+                            <span class="checkbox-visual">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                    <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                            </span>
+                            <span class="label-text">数字 (0-9)</span>
+                        </label>
+                        <label class="custom-checkbox-wrapper">
+                            <input type="checkbox" id="use-upper" checked>
+                            <span class="checkbox-visual">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                    <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                            </span>
+                            <span class="label-text">大写 (A-Z)</span>
+                        </label>
+                        <label class="custom-checkbox-wrapper">
+                            <input type="checkbox" id="use-lower">
+                            <span class="checkbox-visual">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                                    <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                            </span>
+                            <span class="label-text">小写 (a-z)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <button id="generate-btn" class="glow-button">
+                    <span class="btn-content">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M21 12a9 9 0 11-6.219-8.56" />
+                        </svg>
+                        立即生成密钥
+                    </span>
+                    <div class="btn-glow"></div>
+                </button>
+            </section>
+
+            <!-- Result Panel -->
+            <section class="glass-card result-panel">
+                <div class="card-header flex-between">
+                    <h3>
+                        <span class="icon">🚀</span> 生成结果
+                        <span id="result-count" class="badge hidden">0</span>
+                    </h3>
+                    <button id="copy-btn" class="icon-button" disabled title="复制全部">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                        </svg>
+                        <span>复制</span>
+                    </button>
+                </div>
+
+                <div class="terminal-window">
+                    <div class="terminal-header">
+                        <div class="dot red"></div>
+                        <div class="dot yellow"></div>
+                        <div class="dot green"></div>
+                    </div>
+                    <textarea id="result-area" readonly placeholder="// 等待生成指令..."></textarea>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>纯前端本地页面运行，数据安全可靠</p>
+        </footer>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // DOM Elements
+            const generateBtn = document.getElementById('generate-btn');
+            const copyBtn = document.getElementById('copy-btn');
+            const resultArea = document.getElementById('result-area');
+            const resultCountBadge = document.getElementById('result-count');
+
+            // Inputs
+            const inputPrefix = document.getElementById('prefix');
+            const inputLength = document.getElementById('length');
+            const inputCount = document.getElementById('count');
+            const checkNumbers = document.getElementById('use-numbers');
+            const checkUpper = document.getElementById('use-upper');
+            const checkLower = document.getElementById('use-lower');
+            const themeToggleBtn = document.getElementById('theme-toggle');
+
+            // Constants
+            const CHAR_SETS = {
+                numbers: '0123456789',
+                upper: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+                lower: 'abcdefghijklmnopqrstuvwxyz'
+            };
+
+            // Main Generation Function
+            function generateCodes() {
+                const prefix = inputPrefix.value.trim();
+                const length = parseInt(inputLength.value) || 16;
+                const count = parseInt(inputCount.value) || 10;
+
+                // Validation
+                if (!checkNumbers.checked && !checkUpper.checked && !checkLower.checked) {
+                    alert('请至少选择一种字符类型（数字、大写或小写）');
+                    return;
+                }
+
+                if (count > 50000) {
+                    if (!confirm('生成数量较大，可能会导致浏览器短暂卡顿，是否继续？')) {
+                        return;
+                    }
+                }
+
+                // Build Character Pool
+                let pool = '';
+                if (checkNumbers.checked) pool += CHAR_SETS.numbers;
+                if (checkUpper.checked) pool += CHAR_SETS.upper;
+                if (checkLower.checked) pool += CHAR_SETS.lower;
+
+                // Optimizations
+                const poolLength = pool.length;
+                // Generation Loop (with de-duplication)
+                const codes = new Set();
+                let safetyCounter = 0;
+                const maxAttempts = count * 2;
+
+                // Buffer for random values to reduce allocation overhead
+                const randomBuffer = new Uint32Array(length);
+
+                while (codes.size < count) {
+                    window.crypto.getRandomValues(randomBuffer);
+                    let randomPart = '';
+
+                    for (let j = 0; j < length; j++) {
+                        // High-precision method to map 32-bit random int to pool index
+                        // Provides uniform distribution better than simple modulo
+                        const index = Math.floor((randomBuffer[j] / (0xffffffff + 1)) * poolLength);
+                        randomPart += pool[index];
+                    }
+
+                    codes.add(prefix + randomPart);
+
+                    safetyCounter++;
+                    if (safetyCounter > maxAttempts) {
+                        console.warn('Cannot generate requested number of unique codes with current settings.');
+                        break;
+                    }
+                }
+
+                // Output Result
+                resultArea.value = Array.from(codes).join('\n');
+
+                // Update UI
+                updateCountBadge(count);
+                enableCopyButton();
+            }
+
+            // UI Helpers
+            function updateCountBadge(count) {
+                resultCountBadge.textContent = `${count}`;
+                resultCountBadge.classList.remove('hidden');
+            }
+
+            function enableCopyButton() {
+                copyBtn.disabled = false;
+                // Reset to default state
+                copyBtn.innerHTML = `
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                    <span>复制全部</span>
+                `;
+                copyBtn.classList.remove('success');
+            }
+
+            // Copy Functionality
+            copyBtn.addEventListener('click', async () => {
+                if (!resultArea.value) return;
+
+                try {
+                    await navigator.clipboard.writeText(resultArea.value);
+
+                    // Visual Feedback
+                    const originalContent = copyBtn.innerHTML;
+                    copyBtn.innerHTML = `
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span>已复制</span>
+                    `;
+                    copyBtn.classList.add('success');
+
+                    setTimeout(() => {
+                        copyBtn.innerHTML = originalContent;
+                        copyBtn.classList.remove('success');
+                    }, 2000);
+
+                } catch (err) {
+                    console.error('Failed to copy text: ', err);
+                    alert('复制失败，请手动复制');
+                }
+            });
+
+            // Attach Event Listener
+            generateBtn.addEventListener('click', generateCodes);
+
+            // --- Theme Logic ---
+            function initTheme() {
+                const savedTheme = localStorage.getItem('theme');
+                const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+                if (savedTheme === 'dark' || (!savedTheme && systemDark)) {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                } else {
+                    document.documentElement.removeAttribute('data-theme');
+                }
+            }
+
+            function toggleTheme() {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+                if (newTheme === 'dark') {
+                    document.documentElement.setAttribute('data-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    document.documentElement.removeAttribute('data-theme');
+                    localStorage.setItem('theme', 'light');
+                }
+            }
+
+            themeToggleBtn.addEventListener('click', toggleTheme);
+
+            // Listen for system changes if no preference saved
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+                if (!localStorage.getItem('theme')) {
+                    if (e.matches) {
+                        document.documentElement.setAttribute('data-theme', 'dark');
+                    } else {
+                        document.documentElement.removeAttribute('data-theme');
+                    }
+                }
+            });
+
+            // Initialize
+            initTheme();
+        });
+    </script>
+</body>
+
+</html>
