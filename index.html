@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Infinity Code - 高级激活码生成系统</title>
+    <title>激活码生成器 - 批量卡密生成解决方案</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -150,6 +150,59 @@
                         <div class="dot green"></div>
                     </div>
                     <textarea id="result-area" readonly placeholder="// 等待生成指令..."></textarea>
+                </div>
+            </section>
+
+            <!-- Custom Format Panel -->
+            <section class="glass-card format-panel">
+                <div class="card-header">
+                    <h3><span class="icon">🛠️</span> 自定义结果封装</h3>
+                </div>
+
+                <div class="split-grid">
+                    <div class="format-col">
+                        <div class="col-header">
+                            <label for="format-template">输入模版 (JSON)</label>
+                            <div class="hint-wrapper">
+                                <span class="hint">使用 "$CODE$" 作为替换占位符</span>
+                                <button id="copy-placeholder-btn" class="icon-button tiny" title="复制占位符 $CODE$">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2">
+                                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="code-editor-wrapper">
+                            <textarea id="format-template" spellcheck="false">{
+  "code": 200,
+  "msg": "success",
+  "data": {
+    "items": [
+      "$CODE$"
+    ]
+  }
+}</textarea>
+                        </div>
+                    </div>
+
+                    <div class="format-col">
+                        <div class="col-header flex-between">
+                            <label>结果预览</label>
+                            <button id="copy-json-btn" class="icon-button small" disabled>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                                </svg>
+                                复制 JSON
+                            </button>
+                        </div>
+                        <div class="code-editor-wrapper output">
+                            <textarea id="format-result" readonly placeholder="// 等待生成..."></textarea>
+                        </div>
+                    </div>
                 </div>
             </section>
         </main>

@@ -14,6 +14,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const checkLower = document.getElementById('use-lower');
     const themeToggleBtn = document.getElementById('theme-toggle');
 
+    // Custom Format Elements
+    const formatTemplate = document.getElementById('format-template');
+    const formatResult = document.getElementById('format-result');
+    const copyJsonBtn = document.getElementById('copy-json-btn');
+
+    let lastGeneratedCodes = [];
+
     // Constants
     const CHAR_SETS = {
         numbers: '0123456789',
@@ -76,12 +83,113 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Output Result
-        resultArea.value = Array.from(codes).join('\n');
+        const codesArray = Array.from(codes);
+        lastGeneratedCodes = codesArray;
+        resultArea.value = codesArray.join('\n');
 
         // Update UI
         updateCountBadge(count);
         enableCopyButton();
+
+        // Update Custom Format Output
+        updateFormattedOutput();
     }
+
+    // Custom Formatting Logic
+    function updateFormattedOutput() {
+        if (!lastGeneratedCodes || lastGeneratedCodes.length === 0) return;
+
+        const templateText = formatTemplate.value;
+        try {
+            // Deep clone/parse the template
+            let templateObj = JSON.parse(templateText);
+            const placeholder = "$CODE$";
+            let found = false;
+
+            // Recursive search and replace
+            function replacePlaceholder(obj) {
+                for (const key in obj) {
+                    if (obj[key] === placeholder) {
+                        // Direct string match - rare but possible
+                        obj[key] = lastGeneratedCodes;
+                        found = true;
+                        return true;
+                    } else if (Array.isArray(obj[key])) {
+                        // Array check
+                        if (obj[key].includes(placeholder)) {
+                            obj[key] = lastGeneratedCodes;
+                            found = true;
+                            return true;
+                        }
+                        // Recurse into array items if they are objects
+                        // (Not typically needed for a simple list of codes, but good to have)
+                    } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+                        if (replacePlaceholder(obj[key])) return true;
+                    }
+                }
+                return false;
+            }
+
+            replacePlaceholder(templateObj);
+
+            if (!found) {
+                // Fallback: If no placeholder found, warn in the output
+                // But still show valid JSON
+                console.log("Placeholder '$CODE$' not found in template.");
+            }
+
+            formatResult.value = JSON.stringify(templateObj, null, 2);
+            copyJsonBtn.disabled = false;
+        } catch (e) {
+            formatResult.value = "// JSON 格式错误: " + e.message;
+            copyJsonBtn.disabled = true;
+        }
+    }
+
+    // Format Template Listener
+    formatTemplate.addEventListener('input', updateFormattedOutput);
+
+    // Copy Placeholder Button
+    const copyPlaceholderBtn = document.getElementById('copy-placeholder-btn');
+    if (copyPlaceholderBtn) {
+        copyPlaceholderBtn.addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText('$CODE$');
+
+                // Visual feedback (temporarily change icon or color)
+                const originalColor = copyPlaceholderBtn.style.color;
+                copyPlaceholderBtn.style.color = 'var(--success)';
+
+                setTimeout(() => {
+                    copyPlaceholderBtn.style.color = originalColor;
+                }, 1000);
+            } catch (err) {
+                console.error('Failed to copy placeholder', err);
+            }
+        });
+    }
+
+    // Copy JSON Button
+    copyJsonBtn.addEventListener('click', async () => {
+        if (!formatResult.value) return;
+        try {
+            await navigator.clipboard.writeText(formatResult.value);
+
+            const originalHTML = copyJsonBtn.innerHTML;
+            copyJsonBtn.innerHTML = `
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                已复制
+            `;
+            copyJsonBtn.classList.add('success');
+
+            setTimeout(() => {
+                copyJsonBtn.innerHTML = originalHTML;
+                copyJsonBtn.classList.remove('success');
+            }, 2000);
+        } catch (err) {
+            console.error('Failed to copy', err);
+        }
+    });
 
     // UI Helpers
     function updateCountBadge(count) {
